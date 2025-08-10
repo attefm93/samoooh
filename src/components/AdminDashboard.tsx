@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Trash2, Plus, Check, Edit3, Search, Ban, MessageSquare } from 'lucide-react';
+import { Users, Trash2, Plus, Check, Edit3, Search, Ban, MessageSquare, Upload } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
 import { 
   getStudentsFromFirebase, 
   updateStudentInFirebase, 
-  deleteStudentFromFirebase 
+  deleteStudentFromFirebase,
+  addStudentToFirebase 
 } from '../utils/firebaseUtils';
 import { Student } from '../types';
+import { getAllPending, removePendingByCode } from '../utils/localCache';
 
 export const AdminDashboard: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
@@ -16,9 +18,11 @@ export const AdminDashboard: React.FC = () => {
   const [newScore, setNewScore] = useState('');
   const [addingScore, setAddingScore] = useState<string | null>(null);
   const [newScoreData, setNewScoreData] = useState({ examName: '', score: '', maxScore: '' });
+  const [pending, setPending] = useState<any[]>([]);
 
   useEffect(() => {
     loadStudents();
+    setPending(getAllPending());
   }, []);
 
   useEffect(() => {
@@ -110,6 +114,21 @@ export const AdminDashboard: React.FC = () => {
     await loadStudents();
   };
 
+  const handleSyncPending = async () => {
+    const list = getAllPending();
+    for (const s of list) {
+      try {
+        await addStudentToFirebase(s);
+        removePendingByCode(s.code);
+      } catch (e) {
+        console.error('Failed to sync', s.code, e);
+      }
+    }
+    setPending(getAllPending());
+    await loadStudents();
+    alert('تمت مزامنة الطلاب المسجلين محلياً (إن وجد).');
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -118,6 +137,15 @@ export const AdminDashboard: React.FC = () => {
           <h2 className="text-3xl font-bold text-white">لوحة الإدارة</h2>
         </div>
       </div>
+
+      {pending.length > 0 && (
+        <div className="mb-6 bg-blue-500/10 border border-blue-500/30 text-blue-200 rounded-xl p-4 flex items-center justify-between">
+          <div>هناك {pending.length} طالب/طلاب بانتظار المزامنة (حُفظوا محلياً عند التسجيل)</div>
+          <button onClick={handleSyncPending} className="flex items-center px-3 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-colors text-sm">
+            <Upload className="w-4 h-4 ml-1" /> مزامنة الآن
+          </button>
+        </div>
+      )}
 
       {students.length > 0 && (
         <div className="mb-6">

@@ -46,3 +46,16 @@ export const findPendingByEmailAndPassword = (email: string, password: string): 
 export const findPendingByCodeAndPassword = (code: string, password: string): PendingStudent | null => {
   return readAll().find(s => s.code === code && s.password === password) || null;
 };
+
+export const getAllPending = (): PendingStudent[] => {
+  return readAll();
+};
+
+export const removePendingByCode = (code: string) => {
+  const all = readAll().filter(s => s.code !== code);
+  writeAll(all);
+};
+
+export const clearAllPending = () => {
+  writeAll([]);
+};
