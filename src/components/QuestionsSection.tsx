@@ -191,7 +191,7 @@ export const QuestionsSection: React.FC<QuestionsSectionProps> = ({ isOpen, onCl
                 value={studentLogin.password}
                 onChange={(e) => setStudentLogin({ ...studentLogin, password: e.target.value })}
                 placeholder="كلمة المرور"
-                className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none transition-colors text-sm"
+                className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors text-sm focus:shadow-lg"
               />
               <GlowingButton onClick={handleStudentAuth} variant="primary">
                 تفعيل الكتابة

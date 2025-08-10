@@ -5,7 +5,7 @@ import { AnimatedBackground } from './components/AnimatedBackground';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-app-light dark:bg-app-dark">
       <AnimatedBackground />
       
       <div className="relative z-10">
@@ -19,7 +19,7 @@ function App() {
           href="https://wa.me/201069616550"
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-green-500 shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-green-500/90 shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
           aria-label="WhatsApp"
           title="تواصل عبر واتساب"
         >

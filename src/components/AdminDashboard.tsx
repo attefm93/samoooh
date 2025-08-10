@@ -114,12 +114,11 @@ export const AdminDashboard: React.FC = () => {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center">
-          <Users className="w-8 h-8 text-purple-400 ml-3" />
+          <Users className="w-8 h-8 text-blue-400 ml-3" />
           <h2 className="text-3xl font-bold text-white">لوحة الإدارة</h2>
         </div>
       </div>
 
-      {/* Search Bar */}
       {students.length > 0 && (
         <div className="mb-6">
           <div className="relative">
@@ -129,7 +128,7 @@ export const AdminDashboard: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="البحث بالاسم أو الكود أو المرحلة..."
-              className="w-full pl-4 pr-12 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none transition-colors"
+              className="w-full pl-4 pr-12 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:shadow-lg focus:outline-none transition-colors"
             />
           </div>
         </div>
@@ -151,31 +150,19 @@ export const AdminDashboard: React.FC = () => {
               }`}
             >
               <div className="grid md:grid-cols-4 gap-6">
-                {/* Student Info */}
                 <div className="md:col-span-2">
-                  <h3 className="text-xl font-bold text-white mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2 hover:text-blue-300 transition-colors">
                     {student.name}
                     {student.isBanned && (
                       <span className="text-red-400 text-sm ml-2">(محظور)</span>
                     )}
                   </h3>
                   <div className="space-y-1 text-sm">
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">المرحلة:</span> {student.grade}
-                    </p>
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">الكود:</span> 
-                      <span className="font-mono ml-2">{student.code}</span>
-                    </p>
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">البريد:</span> {student.email}
-                    </p>
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">الحضور:</span> {student.attendance || 0} مرة
-                    </p>
-                    <p className="text-gray-300">
-                      <span className="text-gray-400">التعليق:</span> {student.canComment ? 'مسموح' : 'غير مسموح'}
-                    </p>
+                    <p className="text-gray-300"><span className="text-gray-400">المرحلة:</span> {student.grade}</p>
+                    <p className="text-gray-300"><span className="text-gray-400">الكود:</span> <span className="font-mono ml-2">{student.code}</span></p>
+                    <p className="text-gray-300"><span className="text-gray-400">البريد:</span> {student.email}</p>
+                    <p className="text-gray-300"><span className="text-gray-400">الحضور:</span> {student.attendance || 0} مرة</p>
+                    <p className="text-gray-300"><span className="text-gray-400">التعليق:</span> {student.canComment ? 'مسموح' : 'غير مسموح'}</p>
                   </div>
                 </div>
 
@@ -286,7 +273,7 @@ export const AdminDashboard: React.FC = () => {
                   
                   <button
                     onClick={() => setAddingScore(student.id)}
-                    className="flex items-center justify-center px-3 py-2 bg-purple-500/20 border border-purple-500/50 rounded-lg text-purple-400 hover:bg-purple-500/30 transition-colors text-sm"
+                    className="flex items-center justify-center px-3 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors text-sm"
                     disabled={student.isBanned}
                   >
                     <Plus className="w-4 h-4 ml-1" />
@@ -295,7 +282,7 @@ export const AdminDashboard: React.FC = () => {
 
                   <button
                     onClick={() => handleToggleCommentPermission(student)}
-                    className={`flex items-center justify-center px-3 py-2 ${student.canComment ? 'bg-blue-500/20 border border-blue-500/50 text-blue-400 hover:bg-blue-500/30' : 'bg-gray-500/20 border border-gray-500/50 text-gray-300 hover:bg-gray-500/30'} rounded-lg transition-colors text-sm`}
+                    className={`flex items-center justify-center px-3 py-2 ${student.canComment ? 'bg-sky-500/20 border border-sky-500/50 text-sky-400 hover:bg-sky-500/30' : 'bg-gray-500/20 border border-gray-500/50 text-gray-300 hover:bg-gray-500/30'} rounded-lg transition-colors text-sm`}
                   >
                     <MessageSquare className="w-4 h-4 ml-1" />
                     {student.canComment ? 'تعطيل التعليق' : 'السماح بالتعليق'}

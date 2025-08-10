@@ -76,7 +76,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onBack, onClose }) =
             type="text"
             value={loginData.emailOrCode}
             onChange={(e) => setLoginData({ ...loginData, emailOrCode: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none transition-colors text-center"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg text-center"
             placeholder="أدخل البريد الإلكتروني أو كود الطالب"
           />
         </div>
@@ -87,7 +87,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onBack, onClose }) =
             type="password"
             value={loginData.password}
             onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-purple-400 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
             placeholder="أدخل كلمة المرور"
           />
           {error && (
