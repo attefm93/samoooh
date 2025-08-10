@@ -8,7 +8,8 @@ import {
   query, 
   where,
   orderBy,
-  getDoc
+  getDoc,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Student, Question, Answer } from '../types';
@@ -209,4 +210,28 @@ export const approveAnswerInFirebase = async (questionId: string, answerId: stri
   } catch (e) {
     console.error('Error approving answer', e);
   }
+};
+
+export const subscribeToStudents = (callback: (students: Student[]) => void) => {
+  const col = collection(db, 'students');
+  return onSnapshot(col, (snap) => {
+    const list: Student[] = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Student));
+    callback(list);
+  });
+};
+
+export const subscribeToPendingStudents = (callback: (students: Student[]) => void) => {
+  const col = collection(db, 'pending_students');
+  return onSnapshot(col, (snap) => {
+    const list: Student[] = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Student));
+    callback(list);
+  });
+};
+
+export const subscribeToQuestions = (callback: (questions: Question[]) => void) => {
+  const q = query(collection(db, 'questions'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snap) => {
+    const list: Question[] = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Question));
+    callback(list);
+  });
 };

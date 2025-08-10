@@ -8,7 +8,9 @@ import {
   addStudentToFirebase,
   getPendingStudentsFromFirebase,
   approvePendingStudentInFirebase,
-  rejectPendingStudentInFirebase
+  rejectPendingStudentInFirebase,
+  subscribeToStudents,
+  subscribeToPendingStudents
 } from '../utils/firebaseUtils';
 import { Student } from '../types';
 import { getAllPending, removePendingByCode } from '../utils/localCache';
@@ -24,15 +26,13 @@ export const AdminDashboard: React.FC = () => {
   const [pending, setPending] = useState<any[]>([]);
 
   useEffect(() => {
-    loadStudents();
-    refreshPending();
+    const unsubStudents = subscribeToStudents(setStudents);
+    const unsubPending = subscribeToPendingStudents(setPending);
+    return () => {
+      unsubStudents && unsubStudents();
+      unsubPending && unsubPending();
+    };
   }, []);
-
-  const refreshPending = async () => {
-    const server = await getPendingStudentsFromFirebase();
-    const local = getAllPending();
-    setPending([...(server || []), ...(local || [])]);
-  };
 
   useEffect(() => {
     const filtered = students.filter(student =>
