@@ -68,7 +68,7 @@ export const ParentLogin: React.FC<ParentLoginProps> = ({ onBack, onClose }) => 
           <input
             type="text"
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg text-center font-mono text-lg"
             placeholder="أدخل كود الطالب"
             style={{ textTransform: 'uppercase' }}
