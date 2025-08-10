@@ -49,7 +49,6 @@ export const AboutUs: React.FC<AboutUsProps> = ({ isOpen, onClose }) => {
         <div className="text-center fade-in-up">
           <div className="relative inline-block mb-12">
             <div className="relative">
-              {/* Enhanced glowing rings */}
               <div className="absolute inset-0 rounded-full border-4 border-purple-400 animate-ping opacity-30"></div>
               <div className="absolute inset-0 rounded-full border-2 border-purple-300 animate-pulse opacity-50"></div>
               <div className="absolute -inset-4 rounded-full border border-purple-200 animate-spin opacity-20" style={{ animationDuration: '8s' }}></div>
@@ -71,7 +70,6 @@ export const AboutUs: React.FC<AboutUsProps> = ({ isOpen, onClose }) => {
                 />
               </div>
               
-              {/* Animated social icons around the image */}
               <div className="absolute inset-0">
                 {socialLinks.map((social, index) => {
                   const angle = (index * (360 / socialLinks.length)) - 90;
@@ -108,17 +106,6 @@ export const AboutUs: React.FC<AboutUsProps> = ({ isOpen, onClose }) => {
 
           <div className="grid md:grid-cols-2 gap-10 text-right">
             <div className="premium-card p-8 hover:scale-105 transition-all duration-500 slide-in-right">
-              <h4 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">نبذة عن المدرس</h4>
-              <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
-                <p>• خبرة 20 عاماً في تدريس اللغة العربية</p>
-                <p>• متخصص في جميع المراحل التعليمية من الابتدائية حتى الثانوية</p>
-                <p>• حقق مئات الطلاب أعلى الدرجات والمراكز الأولى</p>
-                <p>• يستخدم أحدث طرق التدريس والتكنولوجيا</p>
-                <p>• مدرس معتمد ومؤهل تربوياً</p>
-              </div>
-            </div>
-
-            <div className="premium-card p-8 hover:scale-105 transition-all duration-500 slide-in-left">
               <h4 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">للتواصل</h4>
               <div className="space-y-6">
                 <div className="flex items-center justify-end space-x-4 rtl:space-x-reverse">
@@ -133,7 +120,7 @@ export const AboutUs: React.FC<AboutUsProps> = ({ isOpen, onClose }) => {
                     rel="noopener noreferrer"
                     className="text-green-400 hover:text-green-300 transition-colors text-lg"
                   >
-                    واتساب
+                    واتساب مباشر
                   </a>
                   <MessageCircle className="w-6 h-6 text-green-500 animate-pulse" />
                 </div>
@@ -176,15 +163,17 @@ export const AboutUs: React.FC<AboutUsProps> = ({ isOpen, onClose }) => {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="mt-12 premium-card p-8 hover:scale-105 transition-all duration-500 fade-in-up">
-            <h4 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">رسالتنا</h4>
-            <p className="text-gray-300 leading-relaxed text-lg">
-              نسعى لتقديم تعليم متميز في اللغة العربية يجمع بين الأصالة والمعاصرة، 
-              ونهدف إلى إعداد جيل متفوق يحب لغته العربية ويتقنها، 
-              مع استخدام أحدث الوسائل التعليمية والتكنولوجيا الحديثة لضمان وصول المعلومة بأفضل صورة ممكنة.
-            </p>
+            <div className="premium-card p-8 hover:scale-105 transition-all duration-500 slide-in-left">
+              <h4 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">نبذة قصيرة</h4>
+              <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
+                <p>• خبرة 20 عاماً في تدريس اللغة العربية</p>
+                <p>• متخصص في جميع المراحل التعليمية من الابتدائية حتى الثانوية</p>
+                <p>• مئات الطلاب حققوا أعلى الدرجات والمراكز الأولى</p>
+                <p>• استخدام أحدث الوسائل التعليمية والتكنولوجيا</p>
+                <p>• مدرس معتمد ومؤهل تربوياً</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
