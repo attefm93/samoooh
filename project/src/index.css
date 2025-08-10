@@ -117,3 +117,16 @@ html:not(.dark) body {
 .blue-input { outline: none; border-color: rgba(59,130,246,0.6) !important; box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
 
 .text-dynamic { color: var(--text-color); }
+
+/* Light mode overrides to ensure readability */
+html:not(.dark) .text-white { color: #0f172a !important; }
+html:not(.dark) .text-gray-300 { color: #334155 !important; }
+html:not(.dark) .text-gray-400 { color: #475569 !important; }
+html:not(.dark) .text-yellow-400 { color: #ca8a04 !important; }
+html:not(.dark) .text-blue-300 { color: #2563eb !important; }
+html:not(.dark) .text-blue-400 { color: #2563eb !important; }
+html:not(.dark) .bg-gray-800 { background-color: #f1f5f9 !important; color: #0f172a !important; }
+html:not(.dark) .border-gray-600 { border-color: #e2e8f0 !important; }
+html:not(.dark) .bg-white\/10 { background-color: rgba(15,23,42,0.03) !important; }
+html:not(.dark) .backdrop-blur-md, html:not(.dark) .backdrop-blur-sm { backdrop-filter: none; -webkit-backdrop-filter: none; }
+html:not(.dark) .premium-card { background: #ffffff !important; border-color: #e2e8f0 !important; }
