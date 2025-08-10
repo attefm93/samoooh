@@ -24,9 +24,10 @@ export const ParentLogin: React.FC<ParentLoginProps> = ({ onBack, onClose }) => 
 
     setLoading(true);
     try {
-      let foundStudent = await getStudentByCodeFromFirebase(code.trim().toUpperCase());
+      const normalized = code.trim().toUpperCase();
+      let foundStudent = await getStudentByCodeFromFirebase(normalized);
       if (!foundStudent) {
-        foundStudent = await getPendingStudentByCodeFromFirebase(code.trim().toUpperCase());
+        foundStudent = await getPendingStudentByCodeFromFirebase(normalized);
       }
       if (foundStudent) {
         setStudent(foundStudent);
