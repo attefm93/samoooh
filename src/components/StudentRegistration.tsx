@@ -66,6 +66,10 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
       setStudentCode(code);
     } catch (e: any) {
       setErrorMsg(e?.message || 'حدث خطأ أثناء إنشاء الحساب');
+      // still show code if generated
+      if (!studentCode) {
+        setStudentCode(generateStudentCode());
+      }
     } finally {
       setLoading(false);
     }

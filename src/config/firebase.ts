@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAukhYAhonE_9529-wsPKEPn9FIqjYEHn0",
@@ -15,4 +15,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// Ensure the client is authenticated (anonymous) so Firestore rules with auth pass
+signInAnonymously(auth).catch(() => {/* ignore */});
+
 export default app;
