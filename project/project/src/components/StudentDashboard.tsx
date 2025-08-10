@@ -10,8 +10,8 @@ interface StudentDashboardProps {
 }
 
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({ student, onBack, onClose }) => {
-  const averageScore = student.scores.length > 0 
-    ? student.scores.reduce((a, b) => a + b, 0) / student.scores.length 
+  const averagePercent = student.scores.length > 0 
+    ? (student.scores.reduce((acc, s) => acc + (s.score / (s.maxScore || 100)) * 100, 0) / student.scores.length)
     : 0;
 
   return (
@@ -78,21 +78,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ student, onB
             <div>
               <div className="text-center mb-4">
                 <div className="text-3xl font-bold text-yellow-400 mb-2">
-                  {averageScore.toFixed(1)}
+                  {averagePercent.toFixed(1)}%
                 </div>
                 <p className="text-gray-300">المتوسط العام</p>
               </div>
               
               <div className="space-y-2">
                 <h4 className="text-white font-semibold mb-2">جميع الدرجات:</h4>
-                <div className="grid grid-cols-4 gap-2">
-                  {student.scores.map((score, index) => (
+                <div className="grid grid-cols-2 gap-3">
+                  {student.scores.map((s, index) => (
                     <div
                       key={index}
-                      className="bg-gray-800 rounded-lg p-3 text-center"
+                      className="bg-gray-800 rounded-lg p-3"
                     >
-                      <div className="text-lg font-bold text-white">{score}</div>
-                      <div className="text-xs text-gray-400">اختبار {index + 1}</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-lg font-bold text-white">{s.score} / {s.maxScore}</div>
+                        <div className="text-xs text-gray-400">{new Date(s.date).toLocaleDateString('ar-EG')}</div>
+                      </div>
+                      <div className="text-xs text-gray-300 mt-1">{s.examName || `اختبار ${index + 1}`}</div>
                     </div>
                   ))}
                 </div>

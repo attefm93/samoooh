@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Trash2, Plus, Check, Edit3, Search, Ban } from 'lucide-react';
+import { Users, Trash2, Plus, Check, Edit3, Search, Ban, MessageSquare } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { getStudents, updateStudent, deleteStudent, deleteAllStudents } from '../utils/storage';
+import { 
+  getStudentsFromFirebase, 
+  updateStudentInFirebase, 
+  deleteStudentFromFirebase 
+} from '../utils/firebaseUtils';
 import { Student } from '../types';
 
 export const AdminDashboard: React.FC = () => {
@@ -11,7 +15,7 @@ export const AdminDashboard: React.FC = () => {
   const [editingScore, setEditingScore] = useState<{ studentId: string; scoreIndex: number } | null>(null);
   const [newScore, setNewScore] = useState('');
   const [addingScore, setAddingScore] = useState<string | null>(null);
-  const [newScoreData, setNewScoreData] = useState({ examName: '', score: '' });
+  const [newScoreData, setNewScoreData] = useState({ examName: '', score: '', maxScore: '' });
 
   useEffect(() => {
     loadStudents();
@@ -25,61 +29,49 @@ export const AdminDashboard: React.FC = () => {
     );
     setFilteredStudents(filtered);
   }, [students, searchTerm]);
-  const loadStudents = () => {
-    const loadedStudents = getStudents();
+
+  const loadStudents = async () => {
+    const loadedStudents = await getStudentsFromFirebase();
     setStudents(loadedStudents);
     setFilteredStudents(loadedStudents);
   };
 
-  const handleDeleteStudent = (id: string) => {
+  const handleDeleteStudent = async (id: string) => {
     if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
-      deleteStudent(id);
-      loadStudents();
+      await deleteStudentFromFirebase(id);
+      await loadStudents();
     }
   };
 
-  const handleDeleteAllStudents = () => {
-    if (confirm('هل أنت متأكد من حذف جميع الطلاب؟ هذا الإجراء لا يمكن التراجع عنه!')) {
-      deleteAllStudents();
-      loadStudents();
-    }
+  const handleAttendance = async (student: Student) => {
+    await updateStudentInFirebase(student.id, { attendance: (student.attendance || 0) + 1 });
+    await loadStudents();
   };
 
-  const handleAttendance = (student: Student) => {
-    updateStudent(student.id, { attendance: student.attendance + 1 });
-    loadStudents();
-  };
-
-  const handleAddScore = (studentId: string) => {
-    if (!newScoreData.examName.trim() || !newScoreData.score.trim()) {
+  const handleAddScore = async (studentId: string) => {
+    if (!newScoreData.examName.trim() || !newScoreData.score.trim() || !newScoreData.maxScore.trim()) {
       alert('يرجى ملء جميع الحقول');
       return;
     }
 
     const numScore = Number(newScoreData.score);
-    if (!isNaN(numScore)) {
-      if (numScore >= 0 && numScore <= 100) {
-        const student = students.find(s => s.id === studentId);
-        if (student) {
-          const newScores = [...student.scores, numScore];
-          const newScoreDetails = [...(student.scoreDetails || []), {
-            examName: newScoreData.examName,
-            score: numScore,
-            date: new Date()
-          }];
-          updateStudent(student.id, { 
-            scores: newScores,
-            scoreDetails: newScoreDetails
-          });
-        }
-        loadStudents();
-        setAddingScore(null);
-        setNewScoreData({ examName: '', score: '' });
-      } else {
-        alert('يجب أن تكون الدرجة بين 0 و 100');
+    const numMax = Number(newScoreData.maxScore);
+    if (!isNaN(numScore) && !isNaN(numMax) && numMax > 0 && numScore >= 0 && numScore <= numMax) {
+      const student = students.find(s => s.id === studentId);
+      if (student) {
+        const newScores = [...(student.scores || []), {
+          examName: newScoreData.examName,
+          score: numScore,
+          maxScore: numMax,
+          date: new Date()
+        }];
+        await updateStudentInFirebase(student.id, { scores: newScores });
       }
+      await loadStudents();
+      setAddingScore(null);
+      setNewScoreData({ examName: '', score: '', maxScore: '' });
     } else {
-      alert('يرجى إدخال درجة صحيحة');
+      alert('من فضلك أدخل درجة صحيحة (الدرجة لا تتجاوز الدرجة الكلية)');
     }
   };
 
@@ -88,42 +80,36 @@ export const AdminDashboard: React.FC = () => {
     setNewScore(currentScore.toString());
   };
 
-  const handleSaveScore = () => {
+  const handleSaveScore = async () => {
     if (editingScore && !isNaN(Number(newScore))) {
       const numScore = Number(newScore);
-      if (numScore >= 0 && numScore <= 100) {
-        const student = students.find(s => s.id === editingScore.studentId);
-        if (student) {
-          const newScores = [...student.scores];
-          newScores[editingScore.scoreIndex] = numScore;
-          
-          // Update score details if they exist
-          const newScoreDetails = [...(student.scoreDetails || [])];
-          if (newScoreDetails[editingScore.scoreIndex]) {
-            newScoreDetails[editingScore.scoreIndex].score = numScore;
-          }
-          
-          updateStudent(student.id, { 
-            scores: newScores,
-            scoreDetails: newScoreDetails
-          });
-          loadStudents();
+      const student = students.find(s => s.id === editingScore.studentId);
+      if (student) {
+        const newScores = [...(student.scores || [])];
+        if (newScores[editingScore.scoreIndex]) {
+          newScores[editingScore.scoreIndex] = { ...newScores[editingScore.scoreIndex], score: numScore } as any;
+          await updateStudentInFirebase(student.id, { scores: newScores });
+          await loadStudents();
         }
-      } else {
-        alert('يجب أن تكون الدرجة بين 0 و 100');
       }
     }
     setEditingScore(null);
     setNewScore('');
   };
 
-  const handleBanStudent = (student: Student) => {
+  const handleToggleBan = async (student: Student) => {
     const action = student.isBanned ? 'إلغاء منع' : 'منع';
     if (confirm(`هل أنت متأكد من ${action} هذا الطالب؟`)) {
-      updateStudent(student.id, { isBanned: !student.isBanned });
-      loadStudents();
+      await updateStudentInFirebase(student.id, { isBanned: !student.isBanned });
+      await loadStudents();
     }
   };
+
+  const handleToggleCommentPermission = async (student: Student) => {
+    await updateStudentInFirebase(student.id, { canComment: !student.canComment });
+    await loadStudents();
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -131,16 +117,6 @@ export const AdminDashboard: React.FC = () => {
           <Users className="w-8 h-8 text-purple-400 ml-3" />
           <h2 className="text-3xl font-bold text-white">لوحة الإدارة</h2>
         </div>
-        
-        {students.length > 0 && (
-          <GlowingButton
-            onClick={handleDeleteAllStudents}
-            variant="danger"
-          >
-            <Trash2 className="w-4 h-4 ml-2" />
-            حذف جميع الطلاب
-          </GlowingButton>
-        )}
       </div>
 
       {/* Search Bar */}
@@ -195,7 +171,10 @@ export const AdminDashboard: React.FC = () => {
                       <span className="text-gray-400">البريد:</span> {student.email}
                     </p>
                     <p className="text-gray-300">
-                      <span className="text-gray-400">الحضور:</span> {student.attendance} مرة
+                      <span className="text-gray-400">الحضور:</span> {student.attendance || 0} مرة
+                    </p>
+                    <p className="text-gray-300">
+                      <span className="text-gray-400">التعليق:</span> {student.canComment ? 'مسموح' : 'غير مسموح'}
                     </p>
                   </div>
                 </div>
@@ -203,9 +182,9 @@ export const AdminDashboard: React.FC = () => {
                 {/* Scores */}
                 <div>
                   <h4 className="text-white font-semibold mb-2">الدرجات</h4>
-                  {student.scoreDetails && student.scoreDetails.length > 0 ? (
+                  {student.scores && student.scores.length > 0 ? (
                     <div className="space-y-1">
-                      {student.scoreDetails.map((scoreDetail, index) => (
+                      {student.scores.map((s, index) => (
                         <div key={index} className="flex items-center space-x-2 rtl:space-x-reverse">
                           {editingScore?.studentId === student.id && editingScore?.scoreIndex === index ? (
                             <div className="flex items-center space-x-1 rtl:space-x-reverse">
@@ -215,7 +194,7 @@ export const AdminDashboard: React.FC = () => {
                                 onChange={(e) => setNewScore(e.target.value)}
                                 className="w-16 px-2 py-1 bg-gray-800 border border-gray-600 rounded text-white text-sm"
                                 min="0"
-                                max="100"
+                                max={s.maxScore}
                               />
                               <button
                                 onClick={handleSaveScore}
@@ -227,50 +206,15 @@ export const AdminDashboard: React.FC = () => {
                           ) : (
                             <div className="flex flex-col">
                               <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                                <span className="text-yellow-400 font-semibold">{scoreDetail.score}</span>
+                                <span className="text-yellow-400 font-semibold">{s.score} / {s.maxScore}</span>
                                 <button
-                                  onClick={() => handleEditScore(student.id, index, scoreDetail.score)}
+                                  onClick={() => handleEditScore(student.id, index, s.score)}
                                   className="text-gray-400 hover:text-white"
                                 >
                                   <Edit3 className="w-3 h-3" />
                                 </button>
                               </div>
-                              <span className="text-xs text-gray-400">{scoreDetail.examName}</span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : student.scores.length > 0 ? (
-                    <div className="space-y-1">
-                      {student.scores.map((score, index) => (
-                        <div key={index} className="flex items-center space-x-2 rtl:space-x-reverse">
-                          {editingScore?.studentId === student.id && editingScore?.scoreIndex === index ? (
-                            <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                              <input
-                                type="number"
-                                value={newScore}
-                                onChange={(e) => setNewScore(e.target.value)}
-                                className="w-16 px-2 py-1 bg-gray-800 border border-gray-600 rounded text-white text-sm"
-                                min="0"
-                                max="100"
-                              />
-                              <button
-                                onClick={handleSaveScore}
-                                className="text-green-400 hover:text-green-300"
-                              >
-                                <Check className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                              <span className="text-yellow-400 font-semibold">{score}</span>
-                              <button
-                                onClick={() => handleEditScore(student.id, index, score)}
-                                className="text-gray-400 hover:text-white"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                              </button>
+                              <span className="text-xs text-gray-400">{s.examName}</span>
                             </div>
                           )}
                         </div>
@@ -290,15 +234,24 @@ export const AdminDashboard: React.FC = () => {
                         placeholder="اسم الامتحان"
                         className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-white text-sm"
                       />
-                      <input
-                        type="number"
-                        value={newScoreData.score}
-                        onChange={(e) => setNewScoreData({ ...newScoreData, score: e.target.value })}
-                        placeholder="الدرجة (0-100)"
-                        min="0"
-                        max="100"
-                        className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-white text-sm"
-                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="number"
+                          value={newScoreData.score}
+                          onChange={(e) => setNewScoreData({ ...newScoreData, score: e.target.value })}
+                          placeholder="الدرجة"
+                          min="0"
+                          className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+                        />
+                        <input
+                          type="number"
+                          value={newScoreData.maxScore}
+                          onChange={(e) => setNewScoreData({ ...newScoreData, maxScore: e.target.value })}
+                          placeholder="من (الدرجة الكلية)"
+                          min="1"
+                          className="w-full px-2 py-1 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+                        />
+                      </div>
                       <div className="flex space-x-1 rtl:space-x-reverse">
                         <button
                           onClick={() => handleAddScore(student.id)}
@@ -309,7 +262,7 @@ export const AdminDashboard: React.FC = () => {
                         <button
                           onClick={() => {
                             setAddingScore(null);
-                            setNewScoreData({ examName: '', score: '' });
+                            setNewScoreData({ examName: '', score: '', maxScore: '' });
                           }}
                           className="px-2 py-1 bg-gray-500/20 border border-gray-500/50 rounded text-gray-400 hover:bg-gray-500/30 transition-colors text-xs"
                         >
@@ -339,9 +292,17 @@ export const AdminDashboard: React.FC = () => {
                     <Plus className="w-4 h-4 ml-1" />
                     إضافة درجة
                   </button>
+
+                  <button
+                    onClick={() => handleToggleCommentPermission(student)}
+                    className={`flex items-center justify-center px-3 py-2 ${student.canComment ? 'bg-blue-500/20 border border-blue-500/50 text-blue-400 hover:bg-blue-500/30' : 'bg-gray-500/20 border border-gray-500/50 text-gray-300 hover:bg-gray-500/30'} rounded-lg transition-colors text-sm`}
+                  >
+                    <MessageSquare className="w-4 h-4 ml-1" />
+                    {student.canComment ? 'تعطيل التعليق' : 'السماح بالتعليق'}
+                  </button>
                   
                   <button
-                    onClick={() => handleBanStudent(student)}
+                    onClick={() => handleToggleBan(student)}
                     className={`flex items-center justify-center px-3 py-2 ${
                       student.isBanned 
                         ? 'bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30' 

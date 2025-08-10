@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { findStudentByEmailAndPassword, findStudentByCodeAndPassword } from '../utils/storage';
+import { getStudentByEmailAndPasswordFromFirebase, getStudentByCodeAndPasswordFromFirebase } from '../utils/firebaseUtils';
 import { StudentDashboard } from './StudentDashboard';
 
 interface StudentLoginProps {
@@ -14,33 +14,36 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onBack, onClose }) =
     emailOrCode: '',
     password: ''
   });
-  const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState<any>(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginData.emailOrCode.trim() || !loginData.password.trim()) {
       setError('يرجى ملء جميع الحقول');
       return;
     }
+    setLoading(true);
 
-    // Try login with email first
-    let foundStudent = findStudentByEmailAndPassword(loginData.emailOrCode.trim(), loginData.password.trim());
-    
-    // If not found, try with code
-    if (!foundStudent) {
-      foundStudent = findStudentByCodeAndPassword(loginData.emailOrCode.trim().toUpperCase(), loginData.password.trim());
-    }
-
-    if (foundStudent) {
-      if (foundStudent.isBanned) {
-        setError('تم منعك من الدخول للموقع');
-        return;
+    try {
+      let foundStudent = await getStudentByEmailAndPasswordFromFirebase(loginData.emailOrCode.trim(), loginData.password.trim());
+      if (!foundStudent) {
+        foundStudent = await getStudentByCodeAndPasswordFromFirebase(loginData.emailOrCode.trim().toUpperCase(), loginData.password.trim());
       }
-      setStudent(foundStudent);
-      setError('');
-    } else {
-      setError('البيانات غير صحيحة');
+
+      if (foundStudent) {
+        if (foundStudent.isBanned) {
+          setError('تم منعك من الدخول للموقع');
+        } else {
+          setStudent(foundStudent);
+          setError('');
+        }
+      } else {
+        setError('البيانات غير صحيحة');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,7 +96,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onBack, onClose }) =
         </div>
 
         <GlowingButton type="submit" className="w-full" variant="primary">
-          دخول
+          {loading ? 'جارٍ الدخول...' : 'دخول'}
         </GlowingButton>
       </form>
     </div>

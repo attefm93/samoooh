@@ -125,7 +125,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
             placeholder="أدخل اسمك الكامل"
           />
         </div>
@@ -136,7 +136,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
             placeholder="أدخل بريدك الإلكتروني"
           />
         </div>
@@ -147,7 +147,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
             type="password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
             placeholder="أدخل كلمة المرور"
           />
         </div>
@@ -157,7 +157,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
           <select
             value={formData.grade}
             onChange={(e) => setFormData({ ...formData, grade: e.target.value as Grade })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
           >
             <option value="">اختر المرحلة</option>
             {grades.map((grade) => (

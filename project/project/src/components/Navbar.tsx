@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlowingButton } from './GlowingButton';
 import { LoginModal } from './LoginModal';
 import { AdminModal } from './AdminModal';
 import { HonorBoard } from './HonorBoard';
 import { AboutUs } from './AboutUs';
 import { QuestionsSection } from './QuestionsSection';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Moon, Sun } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -13,6 +13,21 @@ export const Navbar: React.FC = () => {
   const [showHonorBoard, setShowHonorBoard] = useState(false);
   const [showAboutUs, setShowAboutUs] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [dark, setDark] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    const isDark = saved ? saved === 'dark' : true;
+    setDark(isDark);
+    document.documentElement.classList.toggle('dark', isDark);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', next);
+  };
 
   return (
     <>
@@ -25,6 +40,10 @@ export const Navbar: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <button onClick={toggleTheme} className="mr-2 text-white/80 hover:text-white transition-colors">
+                {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
               <GlowingButton
                 onClick={() => setShowHonorBoard(true)}
                 variant="primary"
@@ -36,7 +55,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setShowAboutUs(true)}
                 variant="primary"
               >
-                About Us
+                للتواصل
               </GlowingButton>
               
               <GlowingButton
