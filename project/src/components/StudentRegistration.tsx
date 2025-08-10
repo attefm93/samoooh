@@ -45,10 +45,12 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
       return;
     }
 
+    setErrorMsg('');
+    setLoading(true);
+
+    const code = generateStudentCode();
+
     try {
-      setErrorMsg('');
-      setLoading(true);
-      const code = generateStudentCode();
       const student = {
         id: Date.now().toString(),
         name: formData.name,
@@ -66,10 +68,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
       setStudentCode(code);
     } catch (e: any) {
       setErrorMsg(e?.message || 'حدث خطأ أثناء إنشاء الحساب');
-      // still show code if generated
-      if (!studentCode) {
-        setStudentCode(generateStudentCode());
-      }
+      setStudentCode(code);
     } finally {
       setLoading(false);
     }

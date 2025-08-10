@@ -28,7 +28,17 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const unsubStudents = subscribeToStudents(setStudents);
-    const unsubPending = subscribeToPendingStudents(setPending);
+    const unsubPending = subscribeToPendingStudents((list) => {
+      // normalize list to ensure objects contain needed fields
+      setPending((list || []).map((p: any) => ({
+        id: p.id,
+        name: p.name || '',
+        grade: p.grade || '',
+        email: p.email || '',
+        code: p.code || '',
+        createdAt: p.createdAt || new Date()
+      })));
+    });
     return () => {
       unsubStudents && unsubStudents();
       unsubPending && unsubPending();
