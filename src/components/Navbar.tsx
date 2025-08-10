@@ -13,21 +13,23 @@ export const Navbar: React.FC = () => {
   const [showHonorBoard, setShowHonorBoard] = useState(false);
   const [showAboutUs, setShowAboutUs] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : true;
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    const isDark = saved ? saved === 'dark' : true;
-    setDark(isDark);
-    document.documentElement.classList.toggle('dark', isDark);
-  }, []);
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
-  const toggleTheme = () => {
-    const next = !dark;
-    setDark(next);
-    localStorage.setItem('theme', next ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', next);
-  };
+  const toggleTheme = () => setDark(prev => !prev);
 
   return (
     <>
@@ -44,69 +46,21 @@ export const Navbar: React.FC = () => {
                 {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              <GlowingButton
-                onClick={() => setShowHonorBoard(true)}
-                variant="primary"
-              >
-                لوحة الشرف
-              </GlowingButton>
-              
-              <GlowingButton
-                onClick={() => setShowAboutUs(true)}
-                variant="primary"
-              >
-                للتواصل
-              </GlowingButton>
-              
-              <GlowingButton
-                onClick={() => setShowQuestions(true)}
-                variant="primary"
-              >
-                أسأل ؟
-              </GlowingButton>
-              
-              <GlowingButton
-                onClick={() => setShowLoginModal(true)}
-                variant="primary"
-              >
-                تسجيل الدخول
-              </GlowingButton>
-              
-              <GlowingButton
-                onClick={() => setShowAdminModal(true)}
-                variant="secondary"
-              >
-                Admin
-              </GlowingButton>
+              <GlowingButton onClick={() => setShowHonorBoard(true)} variant="primary">لوحة الشرف</GlowingButton>
+              <GlowingButton onClick={() => setShowAboutUs(true)} variant="primary">للتواصل</GlowingButton>
+              <GlowingButton onClick={() => setShowQuestions(true)} variant="primary">أسأل ؟</GlowingButton>
+              <GlowingButton onClick={() => setShowLoginModal(true)} variant="primary">تسجيل الدخول</GlowingButton>
+              <GlowingButton onClick={() => setShowAdminModal(true)} variant="secondary">Admin</GlowingButton>
             </div>
           </div>
         </div>
       </nav>
 
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
-      />
-      
-      <AdminModal 
-        isOpen={showAdminModal} 
-        onClose={() => setShowAdminModal(false)} 
-      />
-      
-      <HonorBoard 
-        isOpen={showHonorBoard} 
-        onClose={() => setShowHonorBoard(false)} 
-      />
-      
-      <AboutUs 
-        isOpen={showAboutUs} 
-        onClose={() => setShowAboutUs(false)} 
-      />
-      
-      <QuestionsSection 
-        isOpen={showQuestions} 
-        onClose={() => setShowQuestions(false)} 
-      />
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <AdminModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} />
+      <HonorBoard isOpen={showHonorBoard} onClose={() => setShowHonorBoard(false)} />
+      <AboutUs isOpen={showAboutUs} onClose={() => setShowAboutUs(false)} />
+      <QuestionsSection isOpen={showQuestions} onClose={() => setShowQuestions(false)} />
     </>
   );
 };

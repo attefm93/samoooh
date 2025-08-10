@@ -3,6 +3,7 @@ import { ArrowRight, Copy, Check } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
 import { addStudentToFirebase } from '../utils/firebaseUtils';
 import { Grade } from '../types';
+import { savePendingStudent } from '../utils/localCache';
 
 interface StudentRegistrationProps {
   onBack: () => void;
@@ -36,6 +37,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
   const [studentCode, setStudentCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +47,11 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
     }
 
     try {
+      setErrorMsg('');
       setLoading(true);
       const code = generateStudentCode();
       const student = {
+        id: Date.now().toString(),
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -59,10 +63,15 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
         canComment: false,
         createdAt: new Date()
       } as any;
-      await addStudentToFirebase(student);
+      try {
+        await addStudentToFirebase(student);
+      } catch (fbErr) {
+        console.error('Firestore error, saving locally:', fbErr);
+        savePendingStudent(student);
+      }
       setStudentCode(code);
-    } catch (e) {
-      alert('حدث خطأ أثناء إنشاء الحساب');
+    } catch (e: any) {
+      setErrorMsg(e?.message || 'حدث خطأ أثناء إنشاء الحساب');
     } finally {
       setLoading(false);
     }
@@ -119,6 +128,9 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {errorMsg && (
+          <p className="text-red-400 text-sm mb-2">{errorMsg}</p>
+        )}
         <div>
           <label className="block text-white mb-2">الاسم</label>
           <input
