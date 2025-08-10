@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Trash2, Plus, Check, Edit3, Search, Ban, MessageSquare, Upload } from 'lucide-react';
+import { Users, Trash2, Plus, Check, Edit3, Search, Ban, MessageSquare, Upload, X as Close } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
 import { 
   getStudentsFromFirebase, 
   updateStudentInFirebase, 
   deleteStudentFromFirebase,
-  addStudentToFirebase 
+  addStudentToFirebase,
+  getPendingStudentsFromFirebase,
+  approvePendingStudentInFirebase,
+  rejectPendingStudentInFirebase
 } from '../utils/firebaseUtils';
 import { Student } from '../types';
 import { getAllPending, removePendingByCode } from '../utils/localCache';
@@ -22,8 +25,14 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadStudents();
-    setPending(getAllPending());
+    refreshPending();
   }, []);
+
+  const refreshPending = async () => {
+    const server = await getPendingStudentsFromFirebase();
+    const local = getAllPending();
+    setPending([...(server || []), ...(local || [])]);
+  };
 
   useEffect(() => {
     const filtered = students.filter(student =>
@@ -114,19 +123,26 @@ export const AdminDashboard: React.FC = () => {
     await loadStudents();
   };
 
-  const handleSyncPending = async () => {
-    const list = getAllPending();
-    for (const s of list) {
-      try {
-        await addStudentToFirebase(s);
-        removePendingByCode(s.code);
-      } catch (e) {
-        console.error('Failed to sync', s.code, e);
-      }
+  const handleApprovePending = async (p: any) => {
+    if (p.id && p.createdAt) {
+      // server pending
+      await approvePendingStudentInFirebase(p.id);
+    } else {
+      // local pending
+      await addStudentToFirebase(p);
+      removePendingByCode(p.code);
     }
-    setPending(getAllPending());
     await loadStudents();
-    alert('تمت مزامنة الطلاب المسجلين محلياً (إن وجد).');
+    await refreshPending();
+  };
+
+  const handleRejectPending = async (p: any) => {
+    if (p.id && p.createdAt) {
+      await rejectPendingStudentInFirebase(p.id);
+    } else {
+      removePendingByCode(p.code);
+    }
+    await refreshPending();
   };
 
   return (
@@ -139,11 +155,26 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {pending.length > 0 && (
-        <div className="mb-6 bg-blue-500/10 border border-blue-500/30 text-blue-200 rounded-xl p-4 flex items-center justify-between">
-          <div>هناك {pending.length} طالب/طلاب بانتظار المزامنة (حُفظوا محلياً عند التسجيل)</div>
-          <button onClick={handleSyncPending} className="flex items-center px-3 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-colors text-sm">
-            <Upload className="w-4 h-4 ml-1" /> مزامنة الآن
-          </button>
+        <div className="mb-8">
+          <h3 className="text-xl font-bold text-white mb-3">طلبات التسجيل الجديدة</h3>
+          <div className="space-y-4">
+            {pending.map((p, idx) => (
+              <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 flex items-center justify-between">
+                <div className="text-sm text-gray-200">
+                  <div className="font-bold text-white">{p.name}</div>
+                  <div className="text-gray-300">{p.grade} • {p.email} • كود: <span className="font-mono">{p.code}</span></div>
+                </div>
+                <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                  <button onClick={() => handleApprovePending(p)} className="px-3 py-2 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400 hover:bg-green-500/30 transition-colors text-sm flex items-center">
+                    <Check className="w-4 h-4 ml-1" /> قبول
+                  </button>
+                  <button onClick={() => handleRejectPending(p)} className="px-3 py-2 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 hover:bg-red-500/30 transition-colors text-sm flex items-center">
+                    <Close className="w-4 h-4 ml-1" /> رفض
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

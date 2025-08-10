@@ -98,6 +98,54 @@ export const deleteStudentFromFirebase = async (id: string) => {
   }
 };
 
+// Pending Students operations
+export const addPendingStudentToFirebase = async (student: Omit<Student, 'id'>) => {
+  try {
+    const docRef = await addDoc(collection(db, 'pending_students'), {
+      ...student,
+      createdAt: new Date()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding pending student:', error);
+    throw error;
+  }
+};
+
+export const getPendingStudentsFromFirebase = async (): Promise<Student[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'pending_students'));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Student));
+  } catch (error) {
+    console.error('Error getting pending students:', error);
+    return [];
+  }
+};
+
+export const approvePendingStudentInFirebase = async (pendingId: string): Promise<string | null> => {
+  try {
+    const pRef = doc(db, 'pending_students', pendingId);
+    const snap = await getDoc(pRef);
+    if (!snap.exists()) return null;
+    const data = snap.data() as any;
+    const newId = await addStudentToFirebase(data);
+    await deleteDoc(pRef);
+    return newId as string;
+  } catch (e) {
+    console.error('Error approving pending student', e);
+    throw e;
+  }
+};
+
+export const rejectPendingStudentInFirebase = async (pendingId: string) => {
+  try {
+    await deleteDoc(doc(db, 'pending_students', pendingId));
+  } catch (e) {
+    console.error('Error rejecting pending student', e);
+    throw e;
+  }
+};
+
 // Questions operations
 export const addQuestionToFirebase = async (question: Omit<Question, 'id'>) => {
   try {

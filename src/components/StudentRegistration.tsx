@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Copy, Check } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { addStudentToFirebase } from '../utils/firebaseUtils';
+import { addPendingStudentToFirebase } from '../utils/firebaseUtils';
 import { Grade } from '../types';
 import { savePendingStudent } from '../utils/localCache';
 
@@ -64,7 +64,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
         createdAt: new Date()
       } as any;
       try {
-        await addStudentToFirebase(student);
+        await addPendingStudentToFirebase(student);
       } catch (fbErr) {
         console.error('Firestore error, saving locally:', fbErr);
         savePendingStudent(student);
