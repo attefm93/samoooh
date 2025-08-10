@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { getStudentByCodeFromFirebase } from '../utils/firebaseUtils';
+import { getStudentByCodeFromFirebase, getPendingStudentByCodeFromFirebase } from '../utils/firebaseUtils';
 import { StudentDashboard } from './StudentDashboard';
 
 interface ParentLoginProps {
@@ -24,7 +24,10 @@ export const ParentLogin: React.FC<ParentLoginProps> = ({ onBack, onClose }) => 
 
     setLoading(true);
     try {
-      const foundStudent = await getStudentByCodeFromFirebase(code.trim().toUpperCase());
+      let foundStudent = await getStudentByCodeFromFirebase(code.trim().toUpperCase());
+      if (!foundStudent) {
+        foundStudent = await getPendingStudentByCodeFromFirebase(code.trim().toUpperCase());
+      }
       if (foundStudent) {
         setStudent(foundStudent);
         setError('');

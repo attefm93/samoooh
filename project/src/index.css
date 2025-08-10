@@ -16,15 +16,22 @@ body {
   direction: rtl;
   text-align: right;
   overflow-x: hidden;
+  color: #e5e7eb;
+}
+
+:root {
+  --bg-app: linear-gradient(135deg, #0b1220 0%, #0a1a2f 40%, #08121d 100%);
+  --text-color: #e5e7eb;
+}
+
+html:not(.dark) body {
+  --bg-app: #ffffff;
+  --text-color: #0f172a;
 }
 
 /* Theme backgrounds */
-.bg-app-light {
-  background: linear-gradient(135deg, #0b1220 0%, #0a1a2f 40%, #08121d 100%);
-}
-.bg-app-dark {
-  background: linear-gradient(135deg, #050b13 0%, #06101c 40%, #03080e 100%);
-}
+.bg-app-light { background: var(--bg-app); }
+.bg-app-dark { background: var(--bg-app); }
 
 /* Custom animations - slowed and no circular spin */
 @keyframes glow {
@@ -108,3 +115,5 @@ body {
 
 /* Input focus helper */
 .blue-input { outline: none; border-color: rgba(59,130,246,0.6) !important; box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
+
+.text-dynamic { color: var(--text-color); }
