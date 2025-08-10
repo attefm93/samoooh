@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
 import { getStudentByCodeFromFirebase } from '../utils/firebaseUtils';
 import { StudentDashboard } from './StudentDashboard';
+import { findPendingByCode } from '../utils/localCache';
 
 interface ParentLoginProps {
   onBack: () => void;
@@ -24,7 +25,11 @@ export const ParentLogin: React.FC<ParentLoginProps> = ({ onBack, onClose }) => 
 
     setLoading(true);
     try {
-      const foundStudent = await getStudentByCodeFromFirebase(code.trim().toUpperCase());
+      let foundStudent = await getStudentByCodeFromFirebase(code.trim().toUpperCase());
+      if (!foundStudent) {
+        const pending = findPendingByCode(code.trim().toUpperCase());
+        if (pending) foundStudent = pending as any;
+      }
       if (foundStudent) {
         setStudent(foundStudent);
         setError('');

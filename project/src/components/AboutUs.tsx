@@ -9,113 +9,45 @@ interface AboutUsProps {
 export const AboutUs: React.FC<AboutUsProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
-  const socialLinks = [
-    { icon: Facebook, url: 'https://www.facebook.com/share/1AyHkwjhzx/', color: 'text-blue-400', hoverColor: 'hover:text-blue-300' },
-    { icon: Facebook, url: 'https://www.facebook.com/share/16kTx6EXUa/', color: 'text-blue-500', hoverColor: 'hover:text-blue-400' },
-    { icon: Instagram, url: 'https://www.instagram.com/sameh.mohamed.39982/', color: 'text-pink-400', hoverColor: 'hover:text-pink-300' },
-    { icon: MessageCircle, url: 'https://wa.me/201069616550', color: 'text-green-500', hoverColor: 'hover:text-green-400' }
+  const socials = [
+    { icon: Facebook, url: 'https://www.facebook.com/share/1AyHkwjhzx/', color: 'text-blue-400' },
+    { icon: Facebook, url: 'https://www.facebook.com/share/16kTx6EXUa/', color: 'text-blue-500' },
+    { icon: Instagram, url: 'https://www.instagram.com/sameh.mohamed.39982/', color: 'text-pink-400' },
+    { icon: MessageCircle, url: 'https://wa.me/201069616550', color: 'text-green-500' }
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-lg">
-      <div className="premium-card p-10 max-w-5xl w-full mx-4 relative max-h-[90vh] overflow-y-auto enhanced-glow">
+      <div className="premium-card p-10 max-w-3xl w-full mx-4 relative max-h-[90vh] overflow-y-auto enhanced-glow">
         <button onClick={onClose} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-all duration-300 hover:scale-110 z-10">
           <X className="w-7 h-7" />
         </button>
 
         <div className="text-center fade-in-up">
-          <div className="relative inline-block mb-12">
-            <div className="relative">
-              <div className="w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-blue-500/60 shadow-2xl relative teacher-image-glow">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/40 via-sky-500/30 to-indigo-600/30"></div>
-                <img
-                  src="/images/200751736_4075686949145707_5525433579295463923_n.jpg"
-                  alt="المدرس سامح عبد الخالق الفايدي"
-                  className="w-full h-full object-cover relative z-10"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white text-5xl font-bold bg-gradient-to-br from-blue-600 to-indigo-700">س</div>';
-                    }
-                  }}
-                />
+          <h2 className="text-4xl font-bold text-white mb-6">للتواصل</h2>
+          
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <img src="/images/200751736_4075686949145707_5525433579295463923_n.jpg" alt="الأستاذ سامح" className="w-56 h-56 object-cover rounded-xl mx-auto" />
+            </div>
+            <div className="space-y-6 text-right">
+              <div className="flex items-center justify-end space-x-4 rtl:space-x-reverse">
+                <span className="text-gray-300 text-lg">01069616550</span>
+                <Phone className="w-6 h-6 text-blue-300" />
               </div>
-
-              <div className="absolute inset-0">
-                {socialLinks.map((social, index) => {
-                  const angle = (index * (360 / socialLinks.length)) - 90;
-                  const radius = 90;
-                  const x = Math.cos(angle * Math.PI / 180) * radius;
-                  const y = Math.sin(angle * Math.PI / 180) * radius;
-                  return (
-                    <a
-                      key={index}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`absolute w-12 h-12 ${social.color} ${social.hoverColor} transition-all duration-300 hover:scale-110 social-icon`}
-                      style={{ left: `calc(50% + ${x}px - 24px)`, top: `calc(50% + ${y}px - 24px)` }}
-                    >
-                      <social.icon className="w-full h-full" />
-                    </a>
-                  );
-                })}
+              <div className="flex items-center justify-end space-x-4 rtl:space-x-reverse">
+                <a href="https://wa.me/201069616550" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 transition-colors text-lg">واتساب مباشر</a>
+                <MessageCircle className="w-6 h-6 text-green-500" />
               </div>
             </div>
           </div>
 
-          <h2 className="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent fade-in-up">
-            الأستاذ سامح عبد الخالق الفايدي
-          </h2>
-          
-          <h3 className="text-3xl font-bold text-blue-300 mb-12">صانع الأوائل</h3>
-
-          <div className="grid md:grid-cols-2 gap-10 text-right">
-            <div className="premium-card p-8 transition-all duration-500 fade-in-up">
-              <h4 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-sky-300 to-blue-400 bg-clip-text text-transparent">للتواصل</h4>
-              <div className="space-y-6">
-                <div className="flex items-center justify-end space-x-4 rtl:space-x-reverse">
-                  <span className="text-gray-300 text-lg">01069616550</span>
-                  <Phone className="w-6 h-6 text-blue-300" />
-                </div>
-                
-                <div className="flex items-center justify-end space-x-4 rtl:space-x-reverse">
-                  <a href="https://wa.me/201069616550" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300 transition-colors text-lg">
-                    واتساب مباشر
-                  </a>
-                  <MessageCircle className="w-6 h-6 text-green-500" />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-end space-x-3 rtl:space-x-reverse">
-                    <span className="text-gray-300 text-lg">صفحات الفيسبوك</span>
-                    <Facebook className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div className="space-y-2 text-base">
-                    <a href="https://www.facebook.com/share/1AyHkwjhzx/" target="_blank" rel="noopener noreferrer" className="block text-blue-400 hover:text-blue-300 transition-all duration-300 hover:scale-105">الصفحة الأولى</a>
-                    <a href="https://www.facebook.com/share/16kTx6EXUa/" target="_blank" rel="noopener noreferrer" className="block text-blue-400 hover:text-blue-300 transition-all duration-300 hover:scale-105">الصفحة الثانية</a>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end space-x-4 rtl:space-x-reverse">
-                  <a href="https://www.instagram.com/sameh.mohamed.39982/" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-300 transition-all duration-300 hover:scale-105 text-lg">Instagram</a>
-                  <Instagram className="w-6 h-6 text-pink-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="premium-card p-8 transition-all duration-500 fade-in-up">
-              <h4 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 to-sky-300 bg-clip-text text-transparent">نبذة قصيرة</h4>
-              <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
-                <p>• خبرة 20 عاماً في تدريس اللغة العربية</p>
-                <p>• متخصص في جميع المراحل التعليمية من الابتدائية حتى الثانوية</p>
-                <p>• مئات الطلاب حققوا أعلى الدرجات والمراكز الأولى</p>
-                <p>• استخدام أحدث الوسائل التعليمية والتكنولوجيا</p>
-                <p>• مدرس معتمد ومؤهل تربوياً</p>
-              </div>
-            </div>
+          <div className="mt-10 flex items-center justify-center space-x-6 rtl:space-x-reverse">
+            {socials.map((s, i) => (
+              <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className={`${s.color} hover:opacity-80`}>
+                <s.icon className="w-8 h-8" />
+              </a>
+            ))}
           </div>
         </div>
       </div>
