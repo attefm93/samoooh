@@ -123,6 +123,19 @@ export const getPendingStudentsFromFirebase = async (): Promise<Student[]> => {
   }
 };
 
+export const getPendingStudentByCodeFromFirebase = async (code: string): Promise<Student | null> => {
+  try {
+    const qy = query(collection(db, 'pending_students'), where('code', '==', code));
+    const qs = await getDocs(qy);
+    if (qs.empty) return null;
+    const d = qs.docs[0];
+    return { id: d.id, ...(d.data() as any) } as Student;
+  } catch (e) {
+    console.error('Error finding pending student by code', e);
+    return null;
+  }
+};
+
 export const approvePendingStudentInFirebase = async (pendingId: string): Promise<string | null> => {
   try {
     const pRef = doc(db, 'pending_students', pendingId);
