@@ -3,7 +3,6 @@ import { ArrowRight, Copy, Check } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
 import { addPendingStudentToFirebase } from '../utils/firebaseUtils';
 import { Grade } from '../types';
-import { savePendingStudent } from '../utils/localCache';
 
 interface StudentRegistrationProps {
   onBack: () => void;
@@ -63,12 +62,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
         canComment: false,
         createdAt: new Date()
       } as any;
-      try {
-        await addPendingStudentToFirebase(student);
-      } catch (fbErr) {
-        console.error('Firestore error, saving locally:', fbErr);
-        savePendingStudent(student);
-      }
+      await addPendingStudentToFirebase(student);
       setStudentCode(code);
     } catch (e: any) {
       setErrorMsg(e?.message || 'حدث خطأ أثناء إنشاء الحساب');

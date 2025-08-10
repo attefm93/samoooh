@@ -3,7 +3,6 @@ import { ArrowRight } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
 import { getStudentByEmailAndPasswordFromFirebase, getStudentByCodeAndPasswordFromFirebase } from '../utils/firebaseUtils';
 import { StudentDashboard } from './StudentDashboard';
-import { findPendingByEmailAndPassword, findPendingByCodeAndPassword } from '../utils/localCache';
 
 interface StudentLoginProps {
   onBack: () => void;
@@ -32,11 +31,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onBack, onClose }) =
       if (!foundStudent) {
         foundStudent = await getStudentByCodeAndPasswordFromFirebase(loginData.emailOrCode.trim().toUpperCase(), loginData.password.trim());
       }
-      if (!foundStudent) {
-        // fallback to local cache
-        foundStudent = findPendingByEmailAndPassword(loginData.emailOrCode.trim(), loginData.password.trim())
-          || findPendingByCodeAndPassword(loginData.emailOrCode.trim().toUpperCase(), loginData.password.trim()) as any;
-      }
+      
 
       if (foundStudent) {
         if (foundStudent.isBanned) {
