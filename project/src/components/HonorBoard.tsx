@@ -23,6 +23,12 @@ export const HonorBoard: React.FC<HonorBoardProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  const calcAveragePercent = (student: Student): number => {
+    if (!student.scores || student.scores.length === 0) return 0;
+    const total = student.scores.reduce((acc, s) => acc + (s.score / (s.maxScore || 100)) * 100, 0);
+    return total / student.scores.length;
+  };
+
   const loadHonorBoard = async () => {
     try {
       const students = await getStudentsFromFirebase();
@@ -30,16 +36,16 @@ export const HonorBoard: React.FC<HonorBoardProps> = ({ isOpen, onClose }) => {
 
       grades.forEach(grade => {
         const gradeStudents = students
-          .filter(student => student.grade === grade && student.scores.length > 0)
+          .filter(student => student.grade === grade && (student.scores?.length || 0) > 0)
           .map(student => ({
             ...student,
-            average: student.scores.reduce((a, b) => (a.score / a.maxScore) * 100 + (b.score / b.maxScore) * 100, 0) / student.scores.length
-          }))
-          .sort((a, b) => (b as any).average - (a as any).average)
+            average: calcAveragePercent(student) as any
+          }) as any)
+          .sort((a: any, b: any) => b.average - a.average)
           .slice(0, 3);
         
         if (gradeStudents.length > 0) {
-          gradeGroups[grade] = gradeStudents;
+          gradeGroups[grade] = gradeStudents as any;
         }
       });
 
@@ -139,7 +145,6 @@ export const HonorBoard: React.FC<HonorBoardProps> = ({ isOpen, onClose }) => {
                       key={student.id}
                       className={`p-8 rounded-2xl ${getRankStyle(index)} transition-all duration-500 hover:scale-110 relative overflow-hidden`}
                     >
-                      {/* Rank number */}
                       <div className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
                         {index + 1}
                       </div>
@@ -149,13 +154,12 @@ export const HonorBoard: React.FC<HonorBoardProps> = ({ isOpen, onClose }) => {
                           {getRankIcon(index)}
                         </div>
                         
-                        {/* Student name in frame */}
                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4 border border-white/20">
-                          <h4 className="text-xl font-bold text-white">{student.name}</h4>
+                          <h4 className="text-xl font-bold text-white">{(student as any).name}</h4>
                         </div>
                         
                         <div className="text-3xl font-bold text-yellow-400 mb-2 animate-pulse">
-                          {((student as any).average).toFixed(1)}
+                          {(calcAveragePercent(student)).toFixed(1)}%
                         </div>
                         <p className="text-gray-300 text-lg font-semibold">المتوسط العام</p>
                         <div className="mt-4 text-sm text-gray-400">
@@ -163,7 +167,6 @@ export const HonorBoard: React.FC<HonorBoardProps> = ({ isOpen, onClose }) => {
                         </div>
                       </div>
                       
-                      {/* Decorative elements */}
                       <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-white/10 to-transparent rounded-bl-full"></div>
                       <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-white/10 to-transparent rounded-tr-full"></div>
                     </div>

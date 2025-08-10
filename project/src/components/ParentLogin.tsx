@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { findStudentByCode } from '../utils/storage';
+import { getStudentByCodeFromFirebase } from '../utils/firebaseUtils';
 import { StudentDashboard } from './StudentDashboard';
 
 interface ParentLoginProps {
@@ -11,22 +11,28 @@ interface ParentLoginProps {
 
 export const ParentLogin: React.FC<ParentLoginProps> = ({ onBack, onClose }) => {
   const [code, setCode] = useState('');
-  const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState<any>(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) {
       setError('يرجى إدخال كود الطالب');
       return;
     }
 
-    const foundStudent = findStudentByCode(code.trim().toUpperCase());
-    if (foundStudent) {
-      setStudent(foundStudent);
-      setError('');
-    } else {
-      setError('كود الطالب غير صحيح');
+    setLoading(true);
+    try {
+      const foundStudent = await getStudentByCodeFromFirebase(code.trim().toUpperCase());
+      if (foundStudent) {
+        setStudent(foundStudent);
+        setError('');
+      } else {
+        setError('كود الطالب غير صحيح');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +75,7 @@ export const ParentLogin: React.FC<ParentLoginProps> = ({ onBack, onClose }) => 
         </div>
 
         <GlowingButton type="submit" className="w-full" variant="secondary">
-          دخول
+          {loading ? '... جارٍ التحقق' : 'دخول'}
         </GlowingButton>
       </form>
     </div>

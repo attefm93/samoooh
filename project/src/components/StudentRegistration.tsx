@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Copy, Check } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { addStudent } from '../utils/storage';
+import { addStudentToFirebase } from '../utils/firebaseUtils';
 import { Grade } from '../types';
 
 interface StudentRegistrationProps {
@@ -24,6 +24,8 @@ const grades: Grade[] = [
   'تالتة ثانوي'
 ];
 
+const generateStudentCode = (): string => Math.random().toString(36).substr(2, 8).toUpperCase();
+
 export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -33,16 +35,37 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
   });
   const [studentCode, setStudentCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.password || !formData.grade) {
       alert('يرجى ملء جميع الحقول');
       return;
     }
 
-    const student = addStudent(formData);
-    setStudentCode(student.code);
+    try {
+      setLoading(true);
+      const code = generateStudentCode();
+      const student = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        grade: formData.grade,
+        code,
+        scores: [],
+        attendance: 0,
+        isBanned: false,
+        canComment: false,
+        createdAt: new Date()
+      } as any;
+      await addStudentToFirebase(student);
+      setStudentCode(code);
+    } catch (e) {
+      alert('حدث خطأ أثناء إنشاء الحساب');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyCode = () => {
@@ -146,7 +169,7 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
         </div>
 
         <GlowingButton type="submit" className="w-full" variant="primary">
-          إنشاء الحساب
+          {loading ? 'جارٍ الإنشاء...' : 'إنشاء الحساب'}
         </GlowingButton>
       </form>
     </div>
