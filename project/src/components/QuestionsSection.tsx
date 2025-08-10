@@ -8,7 +8,8 @@ import {
   deleteQuestionFromFirebase,
   approveQuestionInFirebase,
   approveAnswerInFirebase,
-  getStudentByCodeAndPasswordFromFirebase
+  getStudentByCodeAndPasswordFromFirebase,
+  subscribeToQuestions
 } from '../utils/firebaseUtils';
 import { Question, Answer, Grade, Student } from '../types';
 
@@ -36,7 +37,8 @@ export const QuestionsSection: React.FC<QuestionsSectionProps> = ({ isOpen, onCl
 
   useEffect(() => {
     if (isOpen) {
-      loadQuestions();
+      const unsub = subscribeToQuestions(setQuestions);
+      return () => unsub && unsub();
     }
   }, [isOpen]);
 
