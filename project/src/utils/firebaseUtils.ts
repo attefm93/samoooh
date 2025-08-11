@@ -141,8 +141,20 @@ export const approvePendingStudentInFirebase = async (pendingId: string): Promis
     const pRef = doc(db, 'pending_students', pendingId);
     const snap = await getDoc(pRef);
     if (!snap.exists()) return null;
-    const data = snap.data() as any;
-    const newId = await addStudentToFirebase(data);
+    const d = snap.data() as any;
+    const safeStudent: Omit<Student, 'id'> = {
+      name: d.name || '',
+      email: d.email || '',
+      password: d.password || '',
+      grade: d.grade || '',
+      code: d.code || '',
+      scores: Array.isArray(d.scores) ? d.scores : [],
+      attendance: typeof d.attendance === 'number' ? d.attendance : 0,
+      isBanned: !!d.isBanned,
+      canComment: !!d.canComment,
+      createdAt: d.createdAt ? d.createdAt : new Date(),
+    } as any;
+    const newId = await addStudentToFirebase(safeStudent);
     await deleteDoc(pRef);
     return newId as string;
   } catch (e) {

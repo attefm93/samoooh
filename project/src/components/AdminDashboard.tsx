@@ -139,7 +139,9 @@ export const AdminDashboard: React.FC = () => {
   const handleApprovePending = async (p: any) => {
     try {
       setApprovingId(p.id);
-      await approvePendingStudentInFirebase(p.id);
+      const result = await approvePendingStudentInFirebase(p.id);
+      console.log('approvePending result id:', result);
+      setActiveTab('students');
       alert('تم قبول الطالب ونقله إلى إدارة الطلاب');
     } catch (e: any) {
       console.error(e);
@@ -153,6 +155,7 @@ export const AdminDashboard: React.FC = () => {
     try {
       setRejectingId(p.id);
       await rejectPendingStudentInFirebase(p.id);
+      console.log('rejected pending id:', p.id);
       alert('تم رفض الطلب وحذف بيانات الطالب');
     } catch (e: any) {
       console.error(e);
