@@ -25,6 +25,8 @@ export const AdminDashboard: React.FC = () => {
   const [newScoreData, setNewScoreData] = useState({ examName: '', score: '', maxScore: '' });
   const [pending, setPending] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'pending' | 'students'>('pending');
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubStudents = subscribeToStudents(setStudents);
@@ -135,25 +137,32 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleApprovePending = async (p: any) => {
-    if (p.id && p.createdAt) {
-      // server pending
-      await approvePendingStudentInFirebase(p.id);
-    } else {
-      // local pending
-      await addStudentToFirebase(p);
-      removePendingByCode(p.code);
+    try {
+      setApprovingId(p.id);
+      const result = await approvePendingStudentInFirebase(p.id);
+      console.log('approvePending result id:', result);
+      setActiveTab('students');
+      alert('تم قبول الطالب ونقله إلى إدارة الطلاب');
+    } catch (e: any) {
+      console.error(e);
+      alert('تعذر قبول الطالب. تحقق من الصلاحيات أو الاتصال بالإنترنت.');
+    } finally {
+      setApprovingId(null);
     }
-    await loadStudents();
-    await refreshPending();
   };
 
   const handleRejectPending = async (p: any) => {
-    if (p.id && p.createdAt) {
+    try {
+      setRejectingId(p.id);
       await rejectPendingStudentInFirebase(p.id);
-    } else {
-      removePendingByCode(p.code);
+      console.log('rejected pending id:', p.id);
+      alert('تم رفض الطلب وحذف بيانات الطالب');
+    } catch (e: any) {
+      console.error(e);
+      alert('تعذر رفض الطلب. تحقق من الصلاحيات أو الاتصال بالإنترنت.');
+    } finally {
+      setRejectingId(null);
     }
-    await refreshPending();
   };
 
   return (
@@ -198,11 +207,11 @@ export const AdminDashboard: React.FC = () => {
                     <div className="text-gray-300">{p.grade} • {p.email} • كود: <span className="font-mono">{p.code}</span></div>
                   </div>
                   <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <button onClick={() => handleApprovePending(p)} className="px-3 py-2 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400 hover:bg-green-500/30 transition-colors text-sm flex items-center">
-                      <Check className="w-4 h-4 ml-1" /> صح
+                    <button onClick={() => handleApprovePending(p)} className="px-3 py-2 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400 hover:bg-green-500/30 transition-colors text-sm flex items-center disabled:opacity-50" disabled={approvingId===p.id}>
+                      <Check className="w-4 h-4 ml-1" /> {approvingId===p.id ? 'جارٍ القبول...' : 'صح'}
                     </button>
-                    <button onClick={() => handleRejectPending(p)} className="px-3 py-2 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 hover:bg-red-500/30 transition-colors text-sm flex items-center">
-                      <Close className="w-4 h-4 ml-1" /> غلط
+                    <button onClick={() => handleRejectPending(p)} className="px-3 py-2 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 hover:bg-red-500/30 transition-colors text-sm flex items-center disabled:opacity-50" disabled={rejectingId===p.id}>
+                      <Close className="w-4 h-4 ml-1" /> {rejectingId===p.id ? 'جارٍ الرفض...' : 'غلط'}
                     </button>
                   </div>
                 </div>
