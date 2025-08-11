@@ -11,7 +11,7 @@ import {
   getDoc,
   onSnapshot
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, authReady } from '../config/firebase';
 import { Student, Question, Answer } from '../types';
 
 // Students operations
@@ -101,6 +101,7 @@ export const deleteStudentFromFirebase = async (id: string) => {
 
 // Pending Students operations
 export const addPendingStudentToFirebase = async (student: Omit<Student, 'id'>) => {
+  await authReady;
   try {
     const docRef = await addDoc(collection(db, 'pending_students'), {
       ...student,
@@ -137,6 +138,7 @@ export const getPendingStudentByCodeFromFirebase = async (code: string): Promise
 };
 
 export const approvePendingStudentInFirebase = async (pendingId: string): Promise<string | null> => {
+  await authReady;
   try {
     const pRef = doc(db, 'pending_students', pendingId);
     const snap = await getDoc(pRef);
@@ -164,6 +166,7 @@ export const approvePendingStudentInFirebase = async (pendingId: string): Promis
 };
 
 export const rejectPendingStudentInFirebase = async (pendingId: string) => {
+  await authReady;
   try {
     await deleteDoc(doc(db, 'pending_students', pendingId));
   } catch (e) {
