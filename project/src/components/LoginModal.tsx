@@ -4,6 +4,7 @@ import { GlowingButton } from './GlowingButton';
 import { StudentRegistration } from './StudentRegistration';
 import { StudentLogin } from './StudentLogin';
 import { ParentLogin } from './ParentLogin';
+import { signInWithGoogle } from '../utils/firebaseUtils';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -34,33 +35,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white mb-10 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">اختر نوع الحساب</h2>
             
-            <div className="space-y-6">
-              <GlowingButton
-                onClick={() => setMode('register')}
-                className="w-full"
-                variant="primary"
-                size="lg"
-              >
-                إنشاء حساب طالب
-              </GlowingButton>
-              
-              <GlowingButton
-                onClick={() => setMode('login')}
-                className="w-full"
-                variant="primary"
-                size="lg"
-              >
-                دخول طالب
-              </GlowingButton>
-              
-              <GlowingButton
-                onClick={() => setMode('parent')}
-                className="w-full"
-                variant="secondary"
-                size="lg"
-              >
-                دخول ولي الأمر
-              </GlowingButton>
+            <div className="space-y-3">
+              <GlowingButton onClick={() => setMode('register')} className="w-full" variant="primary" size="lg">إنشاء حساب طالب</GlowingButton>
+              <GlowingButton onClick={() => setMode('login')} className="w-full" variant="primary" size="lg">دخول طالب</GlowingButton>
+              <GlowingButton onClick={() => setMode('parent')} className="w-full" variant="secondary" size="lg">دخول ولي الأمر</GlowingButton>
+              <GlowingButton onClick={async () => { try { await signInWithGoogle(); alert('تم تسجيل الدخول بجوجل'); } catch { alert('تعذر تسجيل الدخول بجوجل'); } }} className="w-full" variant="secondary" size="lg">تسجيل/دخول بجوجل</GlowingButton>
             </div>
           </div>
         )}

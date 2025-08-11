@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Copy, Check } from 'lucide-react';
 import { GlowingButton } from './GlowingButton';
-import { addPendingStudentToFirebase } from '../utils/firebaseUtils';
+import { addPendingStudentToFirebase, addPendingStudentFromGoogle } from '../utils/firebaseUtils';
 import { Grade } from '../types';
 
 interface StudentRegistrationProps {
@@ -37,12 +37,15 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [useGoogle, setUseGoogle] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.password || !formData.grade) {
-      alert('يرجى ملء جميع الحقول');
-      return;
+      if (!useGoogle) {
+        alert('يرجى ملء جميع الحقول');
+        return;
+      }
     }
 
     setErrorMsg('');
@@ -51,20 +54,24 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
     const code = generateStudentCode();
 
     try {
-      const student = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        grade: formData.grade,
-        code,
-        scores: [],
-        attendance: 0,
-        isBanned: false,
-        canComment: false,
-        createdAt: new Date()
-      } as any;
-      await addPendingStudentToFirebase(student);
+      if (useGoogle) {
+        await addPendingStudentFromGoogle({ code, grade: formData.grade } as any);
+      } else {
+        const student = {
+          id: Date.now().toString(),
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          grade: formData.grade,
+          code,
+          scores: [],
+          attendance: 0,
+          isBanned: false,
+          canComment: false,
+          createdAt: new Date()
+        } as any;
+        await addPendingStudentToFirebase(student);
+      }
       setStudentCode(code);
     } catch (e: any) {
       setErrorMsg(e?.message || 'حدث خطأ أثناء إنشاء الحساب');
@@ -128,51 +135,35 @@ export const StudentRegistration: React.FC<StudentRegistrationProps> = ({ onBack
         {errorMsg && (
           <p className="text-red-400 text-sm mb-2">{errorMsg}</p>
         )}
-        <div>
-          <label className="block text-white mb-2">الاسم</label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
-            placeholder="أدخل اسمك الكامل"
-          />
+
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <input id="googleReg" type="checkbox" checked={useGoogle} onChange={() => setUseGoogle(!useGoogle)} />
+          <label htmlFor="googleReg" className="text-gray-300">استخدام بيانات جوجل إن وُجدت</label>
         </div>
 
-        <div>
-          <label className="block text-white mb-2">البريد الإلكتروني</label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
-            placeholder="أدخل بريدك الإلكتروني"
-          />
-        </div>
-
-        <div>
-          <label className="block text-white mb-2">كلمة المرور</label>
-          <input
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
-            placeholder="أدخل كلمة المرور"
-          />
-        </div>
+        {!useGoogle && (
+          <>
+            <div>
+              <label className="block text-white mb-2">الاسم</label>
+              <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg" placeholder="أدخل اسمك الكامل" />
+            </div>
+            <div>
+              <label className="block text-white mb-2">البريد الإلكتروني</label>
+              <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg" placeholder="أدخل بريدك الإلكتروني" />
+            </div>
+            <div>
+              <label className="block text-white mb-2">كلمة المرور</label>
+              <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg" placeholder="أدخل كلمة المرور" />
+            </div>
+          </>
+        )}
 
         <div>
           <label className="block text-white mb-2">المرحلة الدراسية</label>
-          <select
-            value={formData.grade}
-            onChange={(e) => setFormData({ ...formData, grade: e.target.value as Grade })}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg"
-          >
+          <select value={formData.grade} onChange={(e) => setFormData({ ...formData, grade: e.target.value as Grade })} className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-blue-400 focus:outline-none transition-colors focus:shadow-lg">
             <option value="">اختر المرحلة</option>
             {grades.map((grade) => (
-              <option key={grade} value={grade}>
-                {grade}
-              </option>
+              <option key={grade} value={grade}>{grade}</option>
             ))}
           </select>
         </div>

@@ -12,8 +12,9 @@ import {
   onSnapshot,
   writeBatch
 } from 'firebase/firestore';
-import { db, authReady } from '../config/firebase';
+import { db, authReady, auth } from '../config/firebase';
 import { Student, Question, Answer } from '../types';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 // Students operations
 export const addStudentToFirebase = async (student: Omit<Student, 'id'>) => {
@@ -267,4 +268,32 @@ export const subscribeToQuestions = (callback: (questions: Question[]) => void) 
     const list: Question[] = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Question));
     callback(list);
   });
+};
+
+export const signInWithGoogle = async () => {
+  await authReady.catch(() => undefined);
+  const provider = new GoogleAuthProvider();
+  const res = await signInWithPopup(auth, provider);
+  return res.user;
+};
+
+export const addPendingStudentFromGoogle = async (student: Omit<Student, 'id' | 'email' | 'password' | 'name'> & { code: string }) => {
+  await authReady;
+  const user = auth.currentUser;
+  if (!user) throw new Error('لم يتم تسجيل الدخول بجوجل');
+  const email = user.email || '';
+  const name = user.displayName || '';
+  const payload: Omit<Student, 'id'> = {
+    name,
+    email,
+    password: '',
+    grade: (student as any).grade,
+    code: student.code,
+    scores: [],
+    attendance: 0,
+    isBanned: false,
+    canComment: false,
+    createdAt: new Date()
+  } as any;
+  return addPendingStudentToFirebase(payload);
 };
