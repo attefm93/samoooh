@@ -9,7 +9,8 @@ import {
   where,
   orderBy,
   getDoc,
-  onSnapshot
+  onSnapshot,
+  writeBatch
 } from 'firebase/firestore';
 import { db, authReady } from '../config/firebase';
 import { Student, Question, Answer } from '../types';
@@ -149,16 +150,20 @@ export const approvePendingStudentInFirebase = async (pendingId: string): Promis
       email: d.email || '',
       password: d.password || '',
       grade: d.grade || '',
-      code: d.code || '',
+      code: (d.code || '').toString().toUpperCase(),
       scores: Array.isArray(d.scores) ? d.scores : [],
       attendance: typeof d.attendance === 'number' ? d.attendance : 0,
       isBanned: !!d.isBanned,
       canComment: !!d.canComment,
       createdAt: d.createdAt ? d.createdAt : new Date(),
     } as any;
-    const newId = await addStudentToFirebase(safeStudent);
-    await deleteDoc(pRef);
-    return newId as string;
+
+    const batch = writeBatch(db);
+    const newStudentRef = doc(collection(db, 'students'));
+    batch.set(newStudentRef, safeStudent);
+    batch.delete(pRef);
+    await batch.commit();
+    return newStudentRef.id;
   } catch (e) {
     console.error('Error approving pending student', e);
     throw e;
